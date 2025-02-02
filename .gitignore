@@ -1,0 +1,32 @@
+# Build folders
+bin/
+obj/
+
+# Rider project files
+*.iml
+.idea/
+*/_ReSharper.Caches/
+
+# User-specific files
+*.user
+*.vs/
+.vscode/
+
+# Dependency folders
+/packages/
+*.nuget/
+
+# Logs and Debug
+*.log
+*.tlog
+*.debug
+
+# Publish output
+publish/
+wwwroot/
+
+# Generated files
+*.g.*
+*.gen.cs
+
+riderModule.iml
