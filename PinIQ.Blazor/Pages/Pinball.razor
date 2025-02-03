@@ -1,0 +1,50 @@
+﻿@page "/pinball"
+@using global::Pinball.Entities.Api.Responses.PinballCatalog
+@inject HttpClient Http
+
+<PageTitle>Pinball</PageTitle>
+
+<h1>Pinball Catalogs</h1>
+
+@if (!_pinballCatalogSnapshots.Any())
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Imported</th>
+            <th>Newest Machine</th>
+            <th>Machine Count</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var catalogSnapshot in _pinballCatalogSnapshots)
+        {
+            <tr>
+                <td>@catalogSnapshot.Imported.Date.ToShortDateString()</td>
+                <td>@catalogSnapshot.NewestMachine</td>
+                <td>@catalogSnapshot.MachineCount</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<CatalogSnapshot> _pinballCatalogSnapshots = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var catalogSnapshots = await Http.GetFromJsonAsync<List<CatalogSnapshot>>("sample-data/pinballMachineCatalogs.json");
+        if (catalogSnapshots is not null)
+        {
+            _pinballCatalogSnapshots.Clear();
+            _pinballCatalogSnapshots.AddRange(catalogSnapshots);
+        }
+    }
+}
