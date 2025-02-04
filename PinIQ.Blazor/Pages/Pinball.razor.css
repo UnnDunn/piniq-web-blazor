@@ -1,0 +1,5 @@
+table.clickTable {
+    tbody tr {
+        cursor: pointer;
+    }
+}

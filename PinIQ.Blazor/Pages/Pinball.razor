@@ -1,9 +1,10 @@
-﻿@page "/pinball"
+﻿@page "/pinball/catalogs"
 @using global::Pinball.Entities.Api.Responses.PinballCatalog
 @using PinIQ.Blazor.Services
 @inject PinballCatalogService PinballCatalogService
+@inject NavigationManager Navigation
 
-<PageTitle>Pinball</PageTitle>
+<PageTitle>Pinball Catalogs</PageTitle>
 
 <h1>Pinball Catalogs</h1>
 
@@ -15,7 +16,7 @@
 }
 else
 {
-    <table class="table">
+    <table class="table clickTable">
         <thead>
         <tr>
             <th>Imported</th>
@@ -26,7 +27,7 @@ else
         <tbody>
         @foreach (var catalogSnapshot in _pinballCatalogSnapshots)
         {
-            <tr>
+            <tr @onclick="@(() => Navigation.NavigateTo($"/pinball/catalogs/{catalogSnapshot.Key}"))">
                 <td>@catalogSnapshot.Value.Imported.Date.ToShortDateString()</td>
                 <td>@catalogSnapshot.Value.NewestMachine</td>
                 <td>@catalogSnapshot.Value.MachineCount</td>

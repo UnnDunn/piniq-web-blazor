@@ -1,0 +1,29 @@
+@page "/pinball/catalogs/{Id:int}"
+@using global::Pinball.Entities.Api.Responses.PinballCatalog
+@using PinIQ.Blazor.Services
+@inject PinballCatalogService PinballCatalogService
+
+@if (_catalogSnapshot is not null)
+{
+    <PageTitle>Catalog Snapshot for @_catalogSnapshot.NewestMachine</PageTitle>
+    
+    <h1>Catalog Snapshot for @_catalogSnapshot.NewestMachine</h1>
+}
+else
+{
+    <PageTitle>Unknown Catalog Snapshot</PageTitle>
+    
+    <h1>Unknown Catalog Snapshot</h1>
+    
+    <p>The catalog snapshot with id @Id could not be found or loaded</p>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private CatalogSnapshot? _catalogSnapshot;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _catalogSnapshot = await PinballCatalogService.GetCatalogSnapshot(Id);
+    }
+}
