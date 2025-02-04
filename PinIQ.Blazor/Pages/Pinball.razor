@@ -1,6 +1,7 @@
 ﻿@page "/pinball"
 @using global::Pinball.Entities.Api.Responses.PinballCatalog
-@inject HttpClient Http
+@using PinIQ.Blazor.Services
+@inject PinballCatalogService PinballCatalogService
 
 <PageTitle>Pinball</PageTitle>
 
@@ -40,11 +41,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var catalogSnapshots = await Http.GetFromJsonAsync<List<CatalogSnapshot>>("sample-data/pinballMachineCatalogs.json");
-        if (catalogSnapshots is not null)
-        {
-            _pinballCatalogSnapshots.Clear();
-            _pinballCatalogSnapshots.AddRange(catalogSnapshots);
-        }
+        var catalogSnapshots = await PinballCatalogService.GetCatalogSnapshots();
+        _pinballCatalogSnapshots.Clear();
+        _pinballCatalogSnapshots.AddRange(catalogSnapshots);
     }
 }
