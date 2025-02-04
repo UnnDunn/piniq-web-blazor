@@ -1,29 +1,72 @@
 @page "/pinball/catalogs/{Id:int}"
+@using System.ComponentModel
 @using global::Pinball.Entities.Api.Responses.PinballCatalog
+@using global::Pinball.Entities.Data.PinballMachines
+@using global::Pinball.Entities.Opdb
 @using PinIQ.Blazor.Services
+@using Microsoft.AspNetCore.Components.QuickGrid
 @inject PinballCatalogService PinballCatalogService
 
-@if (_catalogSnapshot is not null)
+@if (_loading)
 {
-    <PageTitle>Catalog Snapshot for @_catalogSnapshot.NewestMachine</PageTitle>
-    
-    <h1>Catalog Snapshot for @_catalogSnapshot.NewestMachine</h1>
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
 }
 else
 {
-    <PageTitle>Unknown Catalog Snapshot</PageTitle>
-    
-    <h1>Unknown Catalog Snapshot</h1>
-    
-    <p>The catalog snapshot with id @Id could not be found or loaded</p>
+    @if (_catalogSnapshot is not null)
+    {
+        <PageTitle>Catalog Snapshot for @_catalogSnapshot.NewestMachine</PageTitle>
+
+        <h1>Catalog Snapshot for @_catalogSnapshot.NewestMachine</h1>
+
+        <div class="container-fluid text-center">
+            <div class="row">
+                <div class="col">
+                    ID: <strong>@_catalogSnapshot.Id</strong>
+                </div>
+                <div class="col">
+                    Created: <strong>@_catalogSnapshot.Created</strong>
+                </div>
+                <div class="col">
+                    Machines: <strong>@_catalogSnapshot.Machines.Count</strong>
+                </div>
+                <div class="col">
+                    Manufacturers: <strong>@_catalogSnapshot.Manufacturers?.Count</strong>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <QuickGrid Items="@_displayedMachines">
+                        <PropertyColumn Property="@(m => m.Name)" Title="Name"/>
+                        <PropertyColumn Property="@(m => m.ManufactureDate)" Title="Manufacture Date"/>
+                    </QuickGrid>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <PageTitle>Unknown Catalog Snapshot</PageTitle>
+
+        <h1>Unknown Catalog Snapshot</h1>
+
+        <p>The catalog snapshot with id @Id could not be found or loaded</p>
+    }
 }
 
 @code {
     [Parameter] public int Id { get; set; }
     private CatalogSnapshot? _catalogSnapshot;
+    private IQueryable<Machine> _displayedMachines = new List<Machine>().AsQueryable();
+    private bool _loading = false;
 
     protected override async Task OnInitializedAsync()
     {
+        _loading = true;
         _catalogSnapshot = await PinballCatalogService.GetCatalogSnapshot(Id);
+        _displayedMachines = _catalogSnapshot?.Machines.AsQueryable() ?? new List<Machine>().AsQueryable();
+        _loading = false;
     }
 }

@@ -7,7 +7,7 @@ namespace PinIQ.Blazor.Services;
 
 public class PinballCatalogService
 {
-    private const string OauthToken = "";
+    private const string OauthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvZ2lkIjoiVGVzdElEIiwib2dpc3MiOiJTZWxmIiwiYXVkIjpbImh0dHBzOi8vbG9jYWxob3N0OjUwMDEiLCJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJodHRwOi8vbG9jYWxob3N0OjgwMDAiLCJodHRwczovL2xvY2FsaG9zdDo4MDAxIl0sIm5iZiI6MTczODcwMjU3NiwiZXhwIjoxNzM4NzA0Mzc2LCJpc3MiOiJwaW5pcS1kZXYifQ.4LvTo2a71VqS1VtvDG6KQ5LQN8K9LvHB5gCGc3smB0I";
     private Dictionary<int, CatalogSnapshot> _catalogSnapshotCache = new();
     private readonly HubConnection _pinballCatalogNotificationHubConnection;
     private readonly HttpClient _httpClient;
@@ -39,10 +39,21 @@ public class PinballCatalogService
     public async Task<CatalogSnapshot?> GetCatalogSnapshot(int id)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", OauthToken);
-        if (_catalogSnapshotCache.TryGetValue(id, out var value)) return value;
+        if (_catalogSnapshotCache.TryGetValue(id, out var value))
+        {
+            if (value.Machines.Count != 0)
+            {
+                return value;
+            }
+        }
+        
+        // get individual snapshot including machine data
         var response = await _httpClient.GetFromJsonAsync<CatalogSnapshot>($"api/admin/PinballMachineCatalogSnapshots/{id}");
         if (response is null) return null;
-        _catalogSnapshotCache.Add(id, response);
+        if (!_catalogSnapshotCache.TryAdd(response.Id, response))
+        {
+            _catalogSnapshotCache[response.Id] = response;
+        }
         return _catalogSnapshotCache[id];
     }
 
