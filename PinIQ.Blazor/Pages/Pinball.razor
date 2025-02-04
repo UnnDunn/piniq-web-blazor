@@ -27,9 +27,9 @@ else
         @foreach (var catalogSnapshot in _pinballCatalogSnapshots)
         {
             <tr>
-                <td>@catalogSnapshot.Imported.Date.ToShortDateString()</td>
-                <td>@catalogSnapshot.NewestMachine</td>
-                <td>@catalogSnapshot.MachineCount</td>
+                <td>@catalogSnapshot.Value.Imported.Date.ToShortDateString()</td>
+                <td>@catalogSnapshot.Value.NewestMachine</td>
+                <td>@catalogSnapshot.Value.MachineCount</td>
             </tr>
         }
         </tbody>
@@ -37,12 +37,24 @@ else
 }
 
 @code {
-    private List<CatalogSnapshot> _pinballCatalogSnapshots = [];
+    private Dictionary<int, CatalogSnapshot> _pinballCatalogSnapshots = [];
 
     protected override async Task OnInitializedAsync()
     {
-        var catalogSnapshots = await PinballCatalogService.GetCatalogSnapshots();
-        _pinballCatalogSnapshots.Clear();
-        _pinballCatalogSnapshots.AddRange(catalogSnapshots);
+        _pinballCatalogSnapshots = await PinballCatalogService.GetCatalogSnapshots();
+        
+        PinballCatalogService.OnCatalogSnapshotAdded += (snapshot) =>
+        {
+            _pinballCatalogSnapshots.Add(snapshot.Id, snapshot);
+            StateHasChanged();
+        };
+
+        PinballCatalogService.OnCatalogSnapshotRemoved += (id) =>
+        {
+            _pinballCatalogSnapshots.Remove(id);
+            StateHasChanged();
+        };
+        
+        await PinballCatalogService.StartNotifications();
     }
 }
